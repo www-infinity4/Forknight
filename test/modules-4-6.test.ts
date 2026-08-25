@@ -57,7 +57,7 @@ describe("NovaSight", () => {
     const result = normalizeScene({
       ...scene,
       visualObjects: [{
-        ...scene.visualObjects[0],
+        ...scene.visualObjects[0]!,
         attemptsPersonIdentification: true,
         containsSensitiveTraitInference: true
       }]
