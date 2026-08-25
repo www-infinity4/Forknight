@@ -212,6 +212,25 @@ export function transitionApproval(
   if (current.status !== "pending") {
     return { outcome: "rejected", reasons: ["approval_state_is_terminal"] };
   }
+
+  const allowedApprovers = [...new Set(current.allowedApprovers)];
+  const approvals = [...new Set(current.approvals)];
+  const invalidState =
+    !validIdentifier(current.proposalId) ||
+    !validIdentifier(current.requestedBy) ||
+    !Number.isInteger(current.requiredApprovals) ||
+    current.requiredApprovals < 1 ||
+    current.requiredApprovals > allowedApprovers.length ||
+    allowedApprovers.length !== current.allowedApprovers.length ||
+    allowedApprovers.some((actorId) => !validIdentifier(actorId)) ||
+    approvals.length !== current.approvals.length ||
+    approvals.some((actorId) => !allowedApprovers.includes(actorId)) ||
+    approvals.includes(current.requestedBy) ||
+    approvals.length >= current.requiredApprovals;
+
+  if (invalidState) {
+    return { outcome: "blocked", reasons: ["approval_state_invalid"] };
+  }
   if (action.actorKind !== "human") {
     return {
       outcome: "rejected",
@@ -249,13 +268,13 @@ export function transitionApproval(
     return { outcome: "rejected", reasons: ["duplicate_approval"] };
   }
 
-  const approvals = [...current.approvals, action.actorId].sort();
+  const nextApprovals = [...current.approvals, action.actorId].sort();
   const status: ApprovalStatus =
-    approvals.length >= current.requiredApprovals ? "approved" : "pending";
+    nextApprovals.length >= current.requiredApprovals ? "approved" : "pending";
 
   return {
     outcome: "verified",
     reasons: [status === "approved" ? "approval_quorum_reached" : "approval_recorded"],
-    state: { ...current, status, approvals },
+    state: { ...current, status, approvals: nextApprovals },
   };
 }
