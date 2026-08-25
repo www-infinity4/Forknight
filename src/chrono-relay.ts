@@ -11,7 +11,7 @@ export async function canonicalDigest(input: Omit<AppendEventRequest, "provenanc
 }
 
 function stableStringify(value: unknown): string {
-  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (value === null || typeof value !== "object") {\n    const encoded = JSON.stringify(value);\n    if (encoded === undefined) throw new Error("unsupported-canonical-value");\n    return encoded;\n  }
   if (Array.isArray(value)) return "[" + value.map(stableStringify).join(",") + "]";
   const source = value as Record<string, unknown>;
   return "{" + Object.keys(source).sort().map((key) =>
