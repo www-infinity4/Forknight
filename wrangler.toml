@@ -1,0 +1,15 @@
+name = "forknight-core"
+main = "src/index.ts"
+compatibility_date = "2026-08-24"
+
+[[durable_objects.bindings]]
+name = "CHRONO_RELAY"
+class_name = "ChronoRelayDurableObject"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ChronoRelayDurableObject"]
+
+[observability]
+enabled = true
+head_sampling_rate = 1
