@@ -8,7 +8,7 @@ import type { ResearchStatus } from "./types";
 
 export { ChronoRelayDurableObject };
 
-function json(outcome: "verified" | "rejected" | "blocked", details: Record<string, unknown>, status = 200): Response {
+function json(outcome: "verified" | "rejected" | "blocked", details: object, status = 200): Response {
   return Response.json({ outcome, ...details }, { status });
 }
 
@@ -45,16 +45,18 @@ export default {
         return json("verified", { job: transitionResearchJob(job, input.next as ResearchStatus) });
       }
       if (request.method === "POST" && url.pathname === "/harvester/evaluate") {
-        return json("verified", evaluateExtraction(parseExtractionManifest(await readJsonBounded(request))) as unknown as Record<string, unknown>);
+        return json("verified", evaluateExtraction(parseExtractionManifest(await readJsonBounded(request))));
       }
       return json("rejected", { error: "not-found" }, 404);
     } catch (error) {
-      if (error instanceof Error && [
-        "body-too-large","empty-body","invalid-json"
-      ].includes(error.message)) {
-        return json("rejected", { error: error.message }, 400);
-      }
-      if (error instanceof Error && !error.message.toLowerCase().includes("storage")) {
+      const rejectedPatterns = [
+        /^(body-too-large|empty-body|invalid-json)$/,
+        /^(append|research|manifest)-object-required$/,
+        /^(invalid-|unsupported-|exact-|files-|feature-|license-|origin-|new-job-)/,
+        /^.*-required$/,
+        /^invalid-transition:/
+      ];
+      if (error instanceof Error && rejectedPatterns.some((pattern) => pattern.test(error.message))) {
         return json("rejected", { error: error.message }, 400);
       }
       const incidentId = crypto.randomUUID();
