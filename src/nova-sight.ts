@@ -25,9 +25,9 @@ export interface SceneObservationInput {
   timestampMs: number;
   rightsBasis: MediaRightsBasis;
   provenanceDigest: string;
-  requestedUses: SceneUse[];
-  visualObjects: VisualObjectObservation[];
-  dialogue: DialogueObservation[];
+  requestedUses: readonly SceneUse[];
+  visualObjects: readonly VisualObjectObservation[];
+  dialogue: readonly DialogueObservation[];
 }
 
 export interface NormalizedSceneObservation {
