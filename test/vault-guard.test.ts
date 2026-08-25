@@ -56,6 +56,27 @@ describe("createWalletProposal", () => {
 });
 
 describe("transitionApproval", () => {
+  it("blocks tampered approval states", () => {
+    const proposal = createWalletProposal(request, policy, {
+      availableBalance: "4.00",
+    }).proposal!;
+    const state = createApprovalState(proposal);
+
+    expect(
+      transitionApproval(
+        { ...state, approvals: ["human-a", "human-a"] },
+        { type: "approve", actorId: "human-b", actorKind: "human" },
+      ),
+    ).toEqual({ outcome: "blocked", reasons: ["approval_state_invalid"] });
+
+    expect(
+      transitionApproval(
+        { ...state, requiredApprovals: 3 },
+        { type: "approve", actorId: "human-b", actorKind: "human" },
+      ),
+    ).toEqual({ outcome: "blocked", reasons: ["approval_state_invalid"] });
+  });
+
   it("rejects AI approval and self-approval", () => {
     const proposal = createWalletProposal(request, policy, {
       availableBalance: "4.00",
